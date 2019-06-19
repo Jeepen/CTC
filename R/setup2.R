@@ -9,6 +9,7 @@ lambda <- 131*1e-5
 tau <- 13
 D1 <- 6
 D2 <- 3/4
+ev <- tau
 gamma <- log(2)
 n <- 1e5
 nSim <- 100
@@ -29,12 +30,12 @@ for(i in 1:nSim){
     ## X <- rweibull(n,shape=0.1657955)
     T <- pmin(X,tau)
     status <- (X<=tau)
-    ExpCases <- (status==1&L<T)#&D2<X)                       ## Exposed cases (EC)
-    casesT <- T[ExpCases]                                  ## Failure time for EC
-    casesL <- L[ExpCases]                                  ## Treatment start for EC
-    casesExpRef <- ((casesT-D2)>casesL&(casesT-D2)<(casesL+D1))
-    casesExpEvent <- (casesT>casesL&(casesT-D1)<casesL)    ## Exposed at event EC
-    nCases <- length(casesT)                               ## Number of EC
+    ExpCases <- (status==1&L<T)#&D2<X)                        ## Exposed cases (EC)
+    casesT <- T[ExpCases]                                     ## Failure time for EC
+    casesL <- L[ExpCases]                                     ## Treatment start for EC
+    casesExpRef <- ((ev-D2)>casesL&(ev-D2)<(casesL+D1))
+    casesExpEvent <- (ev>casesL&(ev-D1)<casesL)             ## Exposed at event EC
+    nCases <- length(casesT)                                  ## Number of EC
     ## id <- rep(1:nCases,2)                                  ## Their ID number twice
     ## Collect in data.frame
     ## dCase <- data.frame(id=id,status=rep(c(1,0),each=nCases),
@@ -46,8 +47,8 @@ for(i in 1:nSim){
     ## for(j in 1:nCases) controlsExp[j] <- sample(which(status==0&L<casesT[j]),1)
     controlsExp <- which(status==0&L<tau)[1:nCases]
     controlsL <- L[controlsExp]
-    controlsExpRef <- ((casesT-D2)>controlsL&(casesT-D2)<(controlsL+D1))
-    controlsExpEvent <- (casesT>controlsL&(casesT-D1)<controlsL)
+    controlsExpRef <- ((ev-D2)>controlsL&(ev-D2)<(controlsL+D1))
+    controlsExpEvent <- (ev>controlsL&(ev-D1)<controlsL)
     ## dControl <- data.frame(id=id+nCases,status=rep(c(1,0),each=nCases),
                            ## Exp=c(controlsExpEvent,controlsExpRef))
     ## or2[i] <- clogit(status~Exp+strata(id),data=dControl)$coefficients
