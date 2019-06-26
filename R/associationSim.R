@@ -9,7 +9,7 @@ lambda <- 131*1e-5
 tau <- 13
 D1 <- 6
 D2 <- 3/4
-gamma <- log(2)
+gamma <- log(1)
 n <- 1e5
 nSim <- 100
 
@@ -29,7 +29,7 @@ for(i in 1:nSim){
     ## X <- rweibull(n,shape=0.1657955)
     T <- pmin(X,tau)
     status <- (X<=tau)
-    ExpCases <- (status==1&L<T)#&D2<X)                       ## Exposed cases (EC)
+    ExpCases <- (status==1&L<T)
     casesT <- T[ExpCases]                                  ## Failure time for EC
     casesL <- L[ExpCases]                                  ## Treatment start for EC
     casesExpRef <- ((casesT-D2)>casesL&(casesT-D2)<(casesL+D1))
@@ -41,18 +41,18 @@ for(i in 1:nSim){
                         ## Exp=c(casesExpEvent,casesExpRef))
     ## or1[i] <- clogit(status~Exp+strata(id),data=dCase)$coefficients
     or1[i] <- log(sum(!casesExpRef&casesExpEvent)) - log(sum(casesExpRef&!casesExpEvent))
-    print(mean(or1[1:i]))
+    ## print(mean(or1[1:i]))
     controlsExp <- numeric(nCases)
-    ## for(j in 1:nCases) controlsExp[j] <- sample(which(status==0&L<casesT[j]),1)
-    controlsExp <- which(status==0&L<tau)[1:nCases]
+    for(j in 1:nCases) controlsExp[j] <- sample(which(T>casesT[j]&L<casesT[j]),1)
+    ## controlsExp <- which(status==0&L<tau)[1:nCases]
     controlsL <- L[controlsExp]
     controlsExpRef <- ((casesT-D2)>controlsL&(casesT-D2)<(controlsL+D1))
     controlsExpEvent <- (casesT>controlsL&(casesT-D1)<controlsL)
     ## dControl <- data.frame(id=id+nCases,status=rep(c(1,0),each=nCases),
                            ## Exp=c(controlsExpEvent,controlsExpRef))
     ## or2[i] <- clogit(status~Exp+strata(id),data=dControl)$coefficients
-    or2[i] <- log(sum(!controlsExpRef&casesExpEvent)) - log(sum(controlsExpRef&!casesExpEvent))
-    print(mean(or2[1:i]))
+    or2[i] <- log(sum(!controlsExpRef&controlsExpEvent)) - log(sum(controlsExpRef&!controlsExpEvent))
+    ## print(mean(or2[1:i]))
     ## d <- rbind(dCase,dControl)
     ## d <- transform(d, CaseControl = rep(c(1,0),each=nrow(dCase)))
     ## estLogit[i] <- clogit(status~Exp*CaseControl+strata(id),data=d)$coefficients[3]
