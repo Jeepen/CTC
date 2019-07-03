@@ -11,7 +11,7 @@ D1 <- 6
 D2 <- 3/4
 gamma <- log(1)
 n <- 1e5
-nSim <- 100
+nSim <- 1000
 
 ## Simulation
 estLogit <- or1 <- or2 <- numeric(nSim)
@@ -42,9 +42,9 @@ for(i in 1:nSim){
     ## or1[i] <- clogit(status~Exp+strata(id),data=dCase)$coefficients
     or1[i] <- log(sum(!casesExpRef&casesExpEvent)) - log(sum(casesExpRef&!casesExpEvent))
     ## print(mean(or1[1:i]))
-    controlsExp <- numeric(nCases)
-    for(j in 1:nCases) controlsExp[j] <- sample(which(T>casesT[j]&L<casesT[j]),1)
-    ## controlsExp <- which(status==0&L<tau)[1:nCases]
+    ## controlsExp <- numeric(nCases)
+    ## for(j in 1:nCases) controlsExp[j] <- sample(which(T>casesT[j]&L<casesT[j]),1)
+    controlsExp <- which(status==0&L<tau)[1:nCases]
     controlsL <- L[controlsExp]
     controlsExpRef <- ((casesT-D2)>controlsL&(casesT-D2)<(controlsL+D1))
     controlsExpEvent <- (casesT>controlsL&(casesT-D1)<controlsL)

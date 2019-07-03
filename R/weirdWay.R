@@ -4,10 +4,12 @@ set.seed(07062019)
 library(survival)
 source("~/Dropbox/phd/Package/CaseTimeControl/R/hazardEst.R")
 source("~/Dropbox/phd/Package/CaseTimeControl/R/ctc.R")
+source("~/Dropbox/phd/CTC/R/estimator.R")
 
 ## Parameters
 n <- 1e5
-lambda <- rep(131*1e-5,n)
+## lambda <- rep(131*1e-5,n)
+lambda <- rep(.01,n)
 ## lambda <- rep(.05/13,n)
 tau <- 13
 D1 <- 6
@@ -15,13 +17,15 @@ D2 <- 3/4
 gamma <- log(1)
 theta <- log(2)
 ## lambda <- lambda*exp(c(rep(0,n/2),rep(theta,n/2)))
-nSim <- 1e4
+nSim <- 1e3
 
 ## Simulation
 estLogit <- or1 <- gammaEst <- numeric(nSim)
 for(i in 1:nSim){
     print(i)
-    L <- runif(n,0,25)
+    ## L <- rgamma(n,shape=5)
+    ## L <- rweibull(n,.3)     
+    L <- runif(n,0,25)      
     ##L <- rexp(n,1/13)
     ## L <- c(runif(n/2,0,25),runif(n/2,0,15))
     u <- runif(n)
@@ -33,14 +37,17 @@ for(i in 1:nSim){
     X[br2<=u] <- (-log(1-u[br2<=u])+lambda[br2<=u]*D1*(1-exp(gamma)))/lambda[br2<=u]
     ## X <- rgamma(n, scale=1200,shape=.5)
     ## X <- rlnorm(n,meanlog = log(100))
-    cond <- (L<pmin(X,tau)&X>(D1))
+    cond <- (L<pmin(X,tau) & X>(D1+D2))
     T <- pmin(X,tau)[cond]
     status <- (X<=tau)[cond]
-    L <- pmin(L,tau)[cond]
-    tmp <- hazardEst(T,status,L,D1,D2,type="short",cut=TRUE)
+    L <- L[cond]
+    gammaEst[i] <- log(sum((L<T & (T-D2)<L)[status==1])) - log(sum((L<(T-D1) & (T-D1-D2)<L)[status==1]))
+    ## tmp <- hazardEst(T,status,L,D1,D2,type="short")
     ## tmp <- ctc(T,status,L,D1,D2,leftTruncation=TRUE)
-    gammaEst[i] <- tmp$Estimate
-    or1[i] <- tmp$SE
+    ## tmp <- est(T,status,L,tau,D1,D2,type="short")
+    ## gammaEst[i] <- tmp$Estimate
+    ## or1[i] <- tmp$SE
+    ## or1[i] <- sqrt(tmp$Variance)
     print(mean(gammaEst[1:i]))
 }
 round(exp(mean(gammaEst)),3)
