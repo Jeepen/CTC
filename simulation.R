@@ -12,7 +12,7 @@ getDoParWorkers()
 
 ## Parameters
 n <- 1e5
-lambda <- rep(1e-3,n) * rgamma(n, .2, .2)
+lambda <- rep(1e-3,n) #* rgamma(n, .2, .2)
 tau <- 13
 D1 <- 6
 D2 <- 3/4
@@ -21,8 +21,9 @@ nsim <- 1000
 
 ## Simulation
 proposed <- classic <- sdEst <- sandwichEst <- rep(NA,nrow=nsim)
-results2 <- foreach(w=1:4, .packages = "mets", .options.RNG = 16122019) %dorng% {
-  X <- numeric(n)
+results2 <- foreach(w=1:4, .packages = "mets", .options.RNG = 20042020) %dorng% {
+## results2 <- foreach(w=1:4, .packages = "mets") %dopar% {
+X <- numeric(n)
   for(i in 1:nsim){
     if((i%%10)==0){
       print(w)
@@ -34,7 +35,8 @@ results2 <- foreach(w=1:4, .packages = "mets", .options.RNG = 16122019) %dorng% 
     br2 <- 1 - exp(-lambda * L - lambda * (L + D1) * exp(gamma[w]) + lambda * L * exp(gamma[w]))
     X[u < br1] <- -log(1 - u[u < br1]) / lambda[u < br1]
     X[br1 <= u & u < br2] <- (-log(1 - u[br1 <= u & u < br2]) +
-                              lambda[br1 <= u & u < br2] * L[br1 <= u & u < br2] * (exp(gamma[w]) - 1)) / (lambda[br1 <= u & u < br2] * exp(gamma[w]))
+                              lambda[br1 <= u & u < br2] * L[br1 <= u & u < br2] * (exp(gamma[w]) - 1)) /
+        (lambda[br1 <= u & u < br2] * exp(gamma[w]))
     X[br2<=u] <- (-log(1 - u[br2 <= u]) + lambda[br2 <= u] * D1 * (1 - exp(gamma[w]))) / lambda[br2 <= u]
     T <- pmin(X, tau)
     ExpCases <- (X <= tau & L < T)                         ## Exposed cases (EC)
