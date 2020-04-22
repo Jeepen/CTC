@@ -17,11 +17,11 @@ tau <- 13
 D1 <- 6
 D2 <- 3/4
 gamma <- c(log(1), log(.5), log(2), log(5))
-nsim <- 1000
+nsim <- 10000
 
 ## Simulation
 proposed <- classic <- sdEst <- sandwichEst <- rep(NA,nrow=nsim)
-results2 <- foreach(w=1:4, .packages = "mets", .options.RNG = 20042020) %dorng% {
+results2 <- foreach(w=1:4, .packages = "mets", .options.RNG = 16122019) %dorng% {
 ## results2 <- foreach(w=1:4, .packages = "mets") %dopar% {
 X <- numeric(n)
   for(i in 1:nsim){
@@ -85,7 +85,7 @@ round(result2, 3)
 mean(results2[[1]][,2]-qnorm(.975)*results2[[1]][,3]<0&results2[[1]][,2]+qnorm(.975)*results2[[1]][,3]>0)
 mean(results2[[1]][,2]-qnorm(.975)*results2[[1]][,4]<0&results2[[1]][,2]+qnorm(.975)*results2[[1]][,4]>0)
 
-
+saveRDS(results2, "~/Dropbox/phd/articles/CTCcode/simResults.rds")
 
 
 
