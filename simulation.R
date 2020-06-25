@@ -3,8 +3,6 @@ rm(list=ls())
 library(survival)
 library(foreach)
 library(mets)
-## library(doParallel)
-## registerDoParallel(makeCluster(3,type = "SOCK"))
 library(doRNG)
 library(doMC)
 registerDoMC(6)
@@ -12,17 +10,16 @@ getDoParWorkers()
 
 ## Parameters
 n <- 1e5
-lambda <- rep(1e-3,n) #* rgamma(n, 1, 1)
+lambda <- rep(1e-3,n)
 tau <- 13
 D1 <- 6
 D2 <- 3/4
 gamma <- c(log(1), log(.5), log(2), log(5))
-nsim <- 1000
+nsim <- 10000
 
 ## Simulation
-proposed <- classic <- sdEst <- sandwichEst <- caseControl <- rep(NA,nrow=nsim)
+proposed <- classic <- sdEst <- sandwichEst <- rep(NA,nrow=nsim)
 results2 <- foreach(w=1:4, .packages = "mets", .options.RNG = 16122019) %dorng% {
-## results2 <- foreach(w=1:4, .packages = "mets") %dopar% {
     X <- numeric(n)
     for(i in 1:nsim){
         if((i%%10)==0){
@@ -74,12 +71,8 @@ results2 <- foreach(w=1:4, .packages = "mets", .options.RNG = 16122019) %dorng% 
         sdEst[i] <- sqrt(vcov(tmp)[2,2])
         tmp <- phreg(Surv(rep(1,nrow(d)), status) ~ Exp + EG + strata(id) + cluster(clusters), data=d)
         sandwichEst[i] <- sqrt(vcov(tmp)[2,2])
-        ## Make case-control comparison
-        dsub <- d[d$status == 1,]
-        tmp <- glm(case ~ Exp, data = dsub, family=binomial)
-        caseControl[i] <- coef(tmp)[2]
     }
-    data.frame(classic,proposed,sdEst,sandwichEst, caseControl)
+    data.frame(classic,proposed,sdEst,sandwichEst)
 }
 result2 <- do.call("rbind", lapply(1:4, function(x) apply(results2[[x]], 2, mean)))
 result2 <- cbind(result2, emp = do.call("c", lapply(1:4, function(x) sd(results2[[x]][,2]))))
