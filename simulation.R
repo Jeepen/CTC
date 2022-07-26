@@ -82,4 +82,4 @@ round(result2, 3)
 mean(results2[[1]][,2]-qnorm(.975)*results2[[1]][,3]<0&results2[[1]][,2]+qnorm(.975)*results2[[1]][,3]>0) # 0.9603
 mean(results2[[1]][,2]-qnorm(.975)*results2[[1]][,4]<0&results2[[1]][,2]+qnorm(.975)*results2[[1]][,4]>0) # 0.9525
 
-saveRDS(results2, "~/Dropbox/phd/articles/CTCcode/simResults.rds")
+
